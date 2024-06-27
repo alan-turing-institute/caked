@@ -100,13 +100,13 @@ class DiskDataLoader(AbstractDataLoader):
         if len(self.classes) == 0:
             self.classes = ids
         else:
-            class_check = np.in1d(self.classes, ids)
+            class_check = np.isin(self.classes, ids)
             if not np.all(class_check):
                 msg = "Not all classes in the list are present in the directory. Missing classes: {}".format(
                     np.asarray(self.classes)[~class_check]
                 )
                 raise RuntimeError(msg)
-            class_check = np.in1d(ids, self.classes)
+            class_check = np.isin(ids, self.classes)
             if not np.all(class_check):
                 logging.basicConfig(format="%(message)s", level=logging.INFO)
                 logging.info(
