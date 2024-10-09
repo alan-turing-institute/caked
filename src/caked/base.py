@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from torch.utils.data import Dataset
+
+from caked.hdf5 import HDF5DataStore
 
 
 class AbstractDataLoader(ABC):
@@ -88,3 +91,26 @@ class AbstractDataset(ABC, Dataset):
     @abstractmethod
     def augment(self, augment: bool, aug_type: str):
         pass
+
+
+class DatasetConfig:
+    datatype: str = "mrc"
+    label_path: str | Path | None = None
+    weight_path: str | Path | None = None
+    dataset_size: int | None = None
+    save_to_disk: bool = False
+    training: bool = True
+    classes: list[str] | None = None
+    pipeline: str = "disk"
+    transforms: list[str] | None = None
+    augments: list[str] | None = None
+    decompose: bool = True
+    decompose_kwargs: dict[str, int] | None = None
+    transform_kwargs: dict | None = None
+    augment_kwargs: dict | None = None
+    map_hdf5_store: HDF5DataStore | None = None
+    label_hdf5_store: HDF5DataStore | None = None
+    weight_hdf5_store: HDF5DataStore | None = None
+    slices: list[tuple[int, int, int]] | None = None
+    slice_indicies = None
+    slices_count: int = 0

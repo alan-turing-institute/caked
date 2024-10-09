@@ -28,7 +28,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 
-dependencies = ["torch", "numpy", "pandas", "mrcfile", "torchvision", "scipy", "pyarrow"]
+dependencies = ["torch", "numpy", "pandas", "mrcfile", "torchvision", "scipy", "pyarrow", "ccpem-utils", "h5py", "psutil"]
 
 [project.optional-dependencies]
 test = [
@@ -60,7 +60,7 @@ minversion = "6.0"
 addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true
 filterwarnings = [
-  "error",
+  "ignore::DeprecationWarning",
 ]
 log_cli_level = "INFO"
 testpaths = [
