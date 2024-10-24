@@ -5,13 +5,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 import torch
-from tests import testdata_mrc, testdata_npy
 
 from caked.dataloader import DiskDataLoader, DiskDataset
 
 ORIG_DIR = Path.cwd()
-TEST_DATA_MRC = Path(testdata_mrc.__file__).parent
-TEST_DATA_NPY = Path(testdata_npy.__file__).parent
+
 TEST_CORRUPT = Path(__file__).parent / "corrupt.mrc"
 DISK_PIPELINE = "disk"
 DATASET_SIZE_ALL = None
@@ -47,36 +45,36 @@ def test_class_instantiation():
     assert test_loader.pipeline == DISK_PIPELINE
 
 
-def test_dataset_instantiation_mrc():
+def test_dataset_instantiation_mrc(test_data_mrc_dir):
     """
     Test case for instantiating a DiskDataset with MRC data.
     """
-    test_dataset = DiskDataset(paths=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_dataset = DiskDataset(paths=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert isinstance(test_dataset, DiskDataset)
 
 
-def test_dataset_instantiation_npy():
+def test_dataset_instantiation_npy(test_data_npy_dir):
     """
     Test case for instantiating a DiskDataset with npy datatype.
     """
-    test_dataset = DiskDataset(paths=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_dataset = DiskDataset(paths=test_data_npy_dir, datatype=DATATYPE_MRC)
     assert isinstance(test_dataset, DiskDataset)
 
 
-def test_load_dataset_no_classes():
+def test_load_dataset_no_classes(test_data_mrc_dir):
     """
     Test case for loading dataset without specifying classes.
     """
     test_loader = DiskDataLoader(
         pipeline=DISK_PIPELINE, classes=DISK_CLASSES_NONE, dataset_size=DATASET_SIZE_ALL
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert isinstance(test_loader.dataset, DiskDataset)
     assert len(test_loader.classes) == len(DISK_CLASSES_FULL_MRC)
     assert all(a == b for a, b in zip(test_loader.classes, DISK_CLASSES_FULL_MRC))
 
 
-def test_load_dataset_all_classes_mrc():
+def test_load_dataset_all_classes_mrc(test_data_mrc_dir):
     """
     Test case for loading a dataset with all classes using DiskDataLoader.
     """
@@ -85,13 +83,13 @@ def test_load_dataset_all_classes_mrc():
         classes=DISK_CLASSES_FULL_MRC,
         dataset_size=DATASET_SIZE_ALL,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert isinstance(test_loader.dataset, DiskDataset)
     assert len(test_loader.classes) == len(DISK_CLASSES_FULL_MRC)
     assert all(a == b for a, b in zip(test_loader.classes, DISK_CLASSES_FULL_MRC))
 
 
-def test_load_dataset_all_classes_npy():
+def test_load_dataset_all_classes_npy(test_data_npy_dir):
     """
     Test case for loading a dataset with all classes using npy files.
 
@@ -106,13 +104,13 @@ def test_load_dataset_all_classes_npy():
         classes=DISK_CLASSES_FULL_NPY,
         dataset_size=DATASET_SIZE_ALL,
     )
-    test_loader.load(datapath=TEST_DATA_NPY, datatype=DATATYPE_NPY)
+    test_loader.load(datapath=test_data_npy_dir, datatype=DATATYPE_NPY)
     assert isinstance(test_loader.dataset, DiskDataset)
     assert len(test_loader.classes) == len(DISK_CLASSES_FULL_NPY)
     assert all(a == b for a, b in zip(test_loader.classes, DISK_CLASSES_FULL_NPY))
 
 
-def test_load_dataset_some_classes():
+def test_load_dataset_some_classes(test_data_mrc_dir):
     """
     Test case for loading a dataset with some specific classes using DiskDataLoader.
     """
@@ -121,13 +119,13 @@ def test_load_dataset_some_classes():
         classes=DISK_CLASSES_SOME_MRC,
         dataset_size=DATASET_SIZE_ALL,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert isinstance(test_loader.dataset, DiskDataset)
     assert len(test_loader.classes) == len(DISK_CLASSES_SOME_MRC)
     assert all(a == b for a, b in zip(test_loader.classes, DISK_CLASSES_SOME_MRC))
 
 
-def test_load_dataset_missing_class():
+def test_load_dataset_missing_class(test_data_mrc_dir):
     """
     Test case for loading dataset with missing classes.
     """
@@ -137,10 +135,10 @@ def test_load_dataset_missing_class():
         dataset_size=DATASET_SIZE_ALL,
     )
     with pytest.raises(Exception, match=r".*Missing classes: .*"):
-        test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+        test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
 
 
-def test_one_image():
+def test_one_image(test_data_mrc_dir):
     """
     Test case for loading one image using DiskDataLoader.
 
@@ -149,14 +147,14 @@ def test_one_image():
     test_loader = DiskDataLoader(
         pipeline=DISK_PIPELINE, classes=DISK_CLASSES_NONE, dataset_size=DATASET_SIZE_ALL
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     test_dataset = test_loader.dataset
     test_item_image, test_item_name = test_dataset.__getitem__(1)
     assert test_item_name in DISK_CLASSES_FULL_MRC
     assert isinstance(test_item_image, torch.Tensor)
 
 
-def test_get_loader_training_false():
+def test_get_loader_training_false(test_data_mrc_dir):
     """
     Test case for the `get_loader` method of the `DiskDataLoader` class when `training` is set to False.
     """
@@ -166,12 +164,12 @@ def test_get_loader_training_false():
         dataset_size=DATASET_SIZE_ALL,
         training=False,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     torch_loader = test_loader.get_loader(batch_size=64)
     assert isinstance(torch_loader, torch.utils.data.DataLoader)
 
 
-def test_get_loader_training_true():
+def test_get_loader_training_true(test_data_mrc_dir):
     """
     Test case for the `get_loader` method of the `DiskDataLoader` class when training is set to True.
     """
@@ -181,7 +179,7 @@ def test_get_loader_training_true():
         dataset_size=DATASET_SIZE_ALL,
         training=True,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     torch_loader_train, torch_loader_val = test_loader.get_loader(
         split_size=0.8, batch_size=64
     )
@@ -189,7 +187,7 @@ def test_get_loader_training_true():
     assert isinstance(torch_loader_val, torch.utils.data.DataLoader)
 
 
-def test_get_loader_training_fail():
+def test_get_loader_training_fail(test_data_mrc_dir):
     """
     Test case for the `get_loader` method of the `DiskDataLoader` class when training fails.
 
@@ -201,14 +199,14 @@ def test_get_loader_training_fail():
         dataset_size=DATASET_SIZE_ALL,
         training=True,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     with pytest.raises(Exception, match=r".* sets must be larger than .*"):
         torch_loader_train, torch_loader_val = test_loader.get_loader(
             split_size=1, batch_size=64
         )
 
 
-def test_processing_data_all_transforms():
+def test_processing_data_all_transforms(test_data_mrc_dir):
     """
     Test the processing of data with all transforms applied.
 
@@ -225,7 +223,7 @@ def test_processing_data_all_transforms():
         training=True,
         transformations=TRANSFORM_ALL,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert test_loader.dataset.normalise
     assert test_loader.dataset.shiftmin
     assert test_loader.dataset.gaussianblur
@@ -235,7 +233,7 @@ def test_processing_data_all_transforms():
     assert label in DISK_CLASSES_FULL_MRC
 
 
-def test_processing_data_some_transforms_npy():
+def test_processing_data_some_transforms_npy(test_data_npy_dir):
     """
     Test case for processing data with some transformations using the DiskDataLoader class.
 
@@ -256,8 +254,8 @@ def test_processing_data_some_transforms_npy():
         dataset_size=DATASET_SIZE_ALL,
         training=True,
     )
-    test_loader_none.load(datapath=TEST_DATA_NPY, datatype=DATATYPE_NPY)
-    test_loader_transf.load(datapath=TEST_DATA_NPY, datatype=DATATYPE_NPY)
+    test_loader_none.load(datapath=test_data_npy_dir, datatype=DATATYPE_NPY)
+    test_loader_transf.load(datapath=test_data_npy_dir, datatype=DATATYPE_NPY)
     assert test_loader_transf.dataset.normalise
     assert not test_loader_transf.dataset.shiftmin
     assert test_loader_transf.dataset.gaussianblur
@@ -273,7 +271,7 @@ def test_processing_data_some_transforms_npy():
     assert len(image_none[1]) == len(image_transf[1])
 
 
-def test_processing_data_rescale():
+def test_processing_data_rescale(test_data_mrc_dir):
     """
     Test the processing of data with rescaling.
 
@@ -288,7 +286,7 @@ def test_processing_data_rescale():
         training=True,
         transformations=TRANSFORM_ALL_RESCALE,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert test_loader.dataset.normalise
     assert test_loader.dataset.shiftmin
     assert test_loader.dataset.gaussianblur
@@ -305,7 +303,7 @@ def test_processing_data_rescale():
         training=True,
         transformations=TRANSFORM_RESCALE,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert not test_loader.dataset.normalise
     assert not test_loader.dataset.shiftmin
     assert not test_loader.dataset.gaussianblur
@@ -316,7 +314,7 @@ def test_processing_data_rescale():
     assert label in DISK_CLASSES_FULL_MRC
 
 
-def test_processing_after_load():
+def test_processing_after_load(test_data_mrc_dir):
     """
     Test the processing steps after loading data using DiskDataLoader.
     """
@@ -327,14 +325,14 @@ def test_processing_after_load():
         training=False,
     )
     test_loader.debug = True
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert test_loader.transformations is None
     assert not test_loader.dataset.normalise
     assert not test_loader.dataset.shiftmin
     assert not test_loader.dataset.gaussianblur
     test_loader.transformations = TRANSFORM_ALL_RESCALE
     pre_dataset = test_loader.dataset
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     post_dataset = test_loader.dataset
     assert test_loader.dataset.normalise
     assert test_loader.dataset.shiftmin
@@ -346,7 +344,7 @@ def test_processing_after_load():
     assert not torch.equal(pre_image, post_image)
 
 
-def test_drop_last():
+def test_drop_last(test_data_mrc_dir):
     """
     Test the drop_last parameter in the get_loader method of the DiskDataLoader class.
     """
@@ -356,7 +354,7 @@ def test_drop_last():
         dataset_size=DATASET_SIZE_ALL,
         training=True,
     )
-    test_loader.load(datapath=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_loader.load(datapath=test_data_mrc_dir, datatype=DATATYPE_MRC)
     loader_train_true, loader_val_true = test_loader.get_loader(
         split_size=0.7, batch_size=64, no_val_drop=True
     )
@@ -369,11 +367,11 @@ def test_drop_last():
     assert loader_val_false.drop_last
 
 
-def test_corrupt_mrcfile():
+def test_corrupt_mrcfile(test_data_mrc_dir):
     """
     Test that corrupt mrcfiles are not loaded and throw an exception.
     """
-    test_dataset = DiskDataset(paths=TEST_DATA_MRC, datatype=DATATYPE_MRC)
+    test_dataset = DiskDataset(paths=test_data_mrc_dir, datatype=DATATYPE_MRC)
     assert isinstance(test_dataset, DiskDataset)
     with pytest.raises(Exception, match=r".* corrupted."):
         test_dataset.read(TEST_CORRUPT)
